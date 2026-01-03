@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="hero-bg login-bg">
+    <div class="login-card">
+        <h1>OTP Verification</h1>
+        <p class="subtitle">
+            Enter the 6-digit OTP sent to your email.
+        </p>
+
+        <form method="POST">
+            <input
+                name="otp"
+                placeholder="Enter OTP"
+                maxlength="6"
+                required
+            >
+            <button type="submit">Verify OTP</button>
+        </form>
+    </div>
+</section>
+
+{% endblock %}
