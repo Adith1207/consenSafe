@@ -4,7 +4,8 @@ from flask import Flask,request,jsonify,render_template, request, redirect, url_
 from werkzeug.security import generate_password_hash,check_password_hash
 
 app = Flask(__name__)
-database = "database.db"
+app.secret_key = "securerail_secret_key"
+DB_NAME = "database.db"
 
 # ---------------- DATABASE SETUP ----------------
 def get_db():

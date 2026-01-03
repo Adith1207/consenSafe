@@ -1,19 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>SecureRail</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-    <div class="navbar">
-        <h2>🚆 SecureRail</h2>
-        {% if session.get("username") %}
-            <a href="/logout">Logout</a>
-        {% endif %}
-    </div>
 
-    <div class="container">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0f172a',
+                        accent: '#2563eb'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+
+    <!-- Navbar -->
+    <nav class="flex justify-between items-center px-8 py-5">
+        <div class="text-2xl font-bold tracking-wide">
+            🚆 SecureRail
+        </div>
+
+        {% if session.get("username") %}
+        <div class="flex items-center gap-4">
+            <span class="text-sm opacity-80">
+                {{ session.get("username") }} ({{ session.get("role") }})
+            </span>
+            <a href="/logout"
+               class="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 transition">
+                Logout
+            </a>
+        </div>
+        {% endif %}
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex justify-center items-center px-4">
         {% block content %}{% endblock %}
-    </div>
+    </main>
+
 </body>
 </html>
