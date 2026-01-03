@@ -1,18 +1,17 @@
 {% extends "base.html" %}
 {% block content %}
 
-<section class="hero">
+<section class="hero-bg register-bg">
 
-    <!-- Left: Registration Form -->
-    <div class="hero-text" data-aos="fade-right">
+
+    <div class="login-card">
         <h1>Create Your SecureRail Account</h1>
-        <p>
-            Register once and access secure railway booking, verification,
-            and administration services.
+        <p class="subtitle">
+            Register once to book tickets, verify journeys,
+            and access secure railway services.
         </p>
 
-        <form method="POST" class="login-box">
-
+        <form method="POST">
             <input
                 name="username"
                 placeholder="Choose a username"
@@ -20,11 +19,25 @@
             >
 
             <input
-                type="password"
-                name="password"
-                placeholder="Create a strong password"
+                type="email"
+                name="email"
+                placeholder="Email address"
                 required
             >
+
+
+            <input
+                type="password"
+                name="password"
+                placeholder="Create a password"
+                required
+            >
+
+            <small style="font-size:13px; color:#6b7280;">
+                Password must be at least 8 characters and include uppercase,
+                lowercase, number, and special character.
+            </small>
+
 
             <select name="role" required>
                 <option value="" disabled selected>Select account type</option>
@@ -33,21 +46,15 @@
                 <option value="ADMIN">System Administrator</option>
             </select>
 
-            <button>
-                <i class="fa-solid fa-user-plus"></i>
+            <button type="submit">
                 Create Account
             </button>
         </form>
 
-        <span class="helper">
-            Already registered?
-            <a href="/login">Go to login</a>
-        </span>
-    </div>
-
-    <!-- Right: Visual -->
-    <div class="hero-image" data-aos="fade-left">
-        <img src="{{ url_for('static', filename='train_register.jpg') }}">
+        <div class="helper">
+            Already have an account?
+            <a href="/login">Login here</a>
+        </div>
     </div>
 
 </section>

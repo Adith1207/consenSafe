@@ -53,13 +53,14 @@ body {
     position: relative;
     height: calc(100vh - 64px);
     width: 100%;
-    background-image: url("/static/train.jpg");
     background-size: cover;
     background-position: center;
+
     display: flex;
     align-items: center;
     justify-content: center;
 }
+
 
 /* Subtle dark overlay – professional look */
 .hero-bg::before {
@@ -71,6 +72,17 @@ body {
         rgba(0, 0, 0, 0.45)
     );
 }
+
+/* LOGIN PAGE BACKGROUND */
+.login-bg {
+    background-image: url("/static/train.jpg");
+}
+
+/* REGISTER PAGE BACKGROUND */
+.register-bg {
+    background-image: url("/static/train_register.jpg");
+}
+
 
 
 /* =====================================================
