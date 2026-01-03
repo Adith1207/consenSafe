@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Welcome, {{ username }}</h3>
+<p>Role: <strong>{{ role }}</strong></p>
+
+{% if role == "PASSENGER" %}
+    <p>You can book tickets.</p>
+{% elif role == "TTE" %}
+    <p>You can verify tickets.</p>
+{% elif role == "ADMIN" %}
+    <p>You can manage users and trains.</p>
+{% endif %}
+{% endblock %}
