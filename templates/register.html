@@ -1,20 +1,51 @@
 {% extends "base.html" %}
 {% block content %}
-<h3>Register</h3>
 
-<form method="POST">
-    <input name="username" placeholder="Username" required>
-    <input type="password" name="password" placeholder="Password" required>
+<div class="w-full max-w-md bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-8 mt-10">
+    <h2 class="text-3xl font-bold text-center mb-6">
+        Create Account
+    </h2>
 
-    <select name="role" required>
-        <option value="">Select Role</option>
-        <option value="PASSENGER">Passenger</option>
-        <option value="TTE">Ticket Examiner</option>
-        <option value="ADMIN">Admin</option>
-    </select>
+    <form method="POST" class="space-y-4">
+        <input
+            name="username"
+            placeholder="Username"
+            required
+            class="w-full px-4 py-3 rounded-lg bg-white/20 focus:outline-none focus:ring-2 focus:ring-accent"
+        />
 
-    <button type="submit">Register</button>
-</form>
+        <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            required
+            class="w-full px-4 py-3 rounded-lg bg-white/20 focus:outline-none focus:ring-2 focus:ring-accent"
+        />
 
-<p>Already have an account? <a href="/login">Login</a></p>
+        <select
+            name="role"
+            required
+            class="w-full px-4 py-3 rounded-lg bg-white/20 text-white focus:outline-none focus:ring-2 focus:ring-accent"
+        >
+            <option value="" disabled selected>Select Role</option>
+            <option value="PASSENGER">Passenger</option>
+            <option value="TTE">Ticket Examiner</option>
+            <option value="ADMIN">Admin</option>
+        </select>
+
+        <button
+            type="submit"
+            class="w-full py-3 rounded-lg bg-accent hover:bg-blue-600 transition font-semibold">
+            Register
+        </button>
+    </form>
+
+    <p class="text-center text-sm mt-5 opacity-80">
+        Already have an account?
+        <a href="/login" class="text-blue-400 hover:underline">
+            Login
+        </a>
+    </p>
+</div>
+
 {% endblock %}
