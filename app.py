@@ -1,5 +1,5 @@
 import sqlite3 
-from flask import Flask,request,jsonify
+from flask import Flask,request,jsonify,render_template, request, redirect, url_for, session
 
 from werkzeug.security import generate_password_hash,check_password_hash
 
@@ -24,3 +24,35 @@ def init_db():
     """)
     conn.commit()
     conn.close()
+
+
+# ---------- ROUTES ----------
+@app.route("/")
+def home():
+    return redirect(url_for("login"))
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+        role = request.form["role"]
+
+        hashed_password = generate_password_hash(password)
+
+        try:
+            conn = get_db()
+            conn.execute(
+                "INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
+                (username, hashed_password, role)
+            )
+            conn.commit()
+            return redirect(url_for("login"))
+        except:
+            return "User already exists"
+
+    return render_template("register.html")
+
+
+
+
