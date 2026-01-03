@@ -31,6 +31,8 @@ def init_db():
 def home():
     return redirect(url_for("login"))
 
+
+# --------- USER REG ----------
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -53,6 +55,7 @@ def register():
 
     return render_template("register.html")
 
+# --------- USER LOGIN ----------
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -75,6 +78,7 @@ def login():
     return render_template("login.html")
 
 
+# --------- DASHBOARD ROUTING ----------
 @app.route("/dashboard")
 def dashboard():
     if "username" not in session:
@@ -85,6 +89,18 @@ def dashboard():
         username=session["username"],
         role=session["role"]
     )
+
+
+# --------- USER LOGOUT ----------
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
+
+if __name__ == "__main__":
+    init_db()
+    app.run(debug=True)
 
 
 
