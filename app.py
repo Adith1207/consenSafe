@@ -1,11 +1,19 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
 import re
+import random
+import time
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.secret_key = "securerail_secret_key"   # change in production
+app.secret_key = "securerail_secret_key"
 DB_NAME = "database.db"
+
+# =====================================================
+# OTP STORE (IN-MEMORY FOR LAB)
+# =====================================================
+# format: { email: { "otp": "123456", "expires": timestamp } }
+otp_store = {}
 
 
 # =====================================================
@@ -34,7 +42,7 @@ def init_db():
 
 
 # =====================================================
-# PASSWORD POLICY (STRONG PASSWORD)
+# STRONG PASSWORD POLICY (NIST-ALIGNED)
 # =====================================================
 
 def is_strong_password(password):
@@ -62,7 +70,9 @@ def home():
     return redirect(url_for("login"))
 
 
-# ---------------- REGISTER -----------------
+# =====================================================
+# REGISTER
+# =====================================================
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -73,7 +83,7 @@ def register():
         role = request.form["role"]
 
         if not is_strong_password(password):
-            return "Password must be strong (8+ chars, upper, lower, number, special char)"
+            return "Password must be strong (8+ chars, upper, lower, number, special)"
 
         hashed_password = generate_password_hash(password)
 
@@ -93,7 +103,9 @@ def register():
     return render_template("register.html")
 
 
-# ---------------- LOGIN -----------------
+# =====================================================
+# LOGIN (EMAIL-BASED)
+# =====================================================
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -119,7 +131,9 @@ def login():
     return render_template("login.html")
 
 
-# ---------------- DASHBOARD -----------------
+# =====================================================
+# DASHBOARD
+# =====================================================
 
 @app.route("/dashboard")
 def dashboard():
@@ -133,7 +147,19 @@ def dashboard():
     )
 
 
-# ---------------- CHANGE PASSWORD -----------------
+# =====================================================
+# LOGOUT
+# =====================================================
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
+
+# =====================================================
+# CHANGE PASSWORD (LOGGED-IN USER)
+# =====================================================
 
 @app.route("/change-password", methods=["GET", "POST"])
 def change_password():
@@ -165,22 +191,104 @@ def change_password():
         conn.close()
         return "Old password incorrect"
 
-    return "Change Password Page (UI to be implemented)"
+    return "Change Password UI already implemented"
 
 
-# ---------------- FORGOT PASSWORD (OTP READY) -----------------
+# =====================================================
+# FORGOT PASSWORD → OTP GENERATION
+# =====================================================
 
-@app.route("/forgot-password")
+@app.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
-    return "Forgot Password flow (OTP via Email to be implemented)"
+    if request.method == "POST":
+        email = request.form["email"].strip().lower()
+
+        conn = get_db()
+        user = conn.execute(
+            "SELECT * FROM users WHERE email = ?",
+            (email,)
+        ).fetchone()
+        conn.close()
+
+        if not user:
+            return "Email not registered"
+
+        otp = str(random.randint(100000, 999999))
+        otp_store[email] = {
+            "otp": otp,
+            "expires": time.time() + 300  # 5 minutes
+        }
+
+        # LAB MODE: Print OTP in terminal
+        print(f"[OTP for {email}] : {otp}")
+
+        session["reset_email"] = email
+        return redirect(url_for("verify_otp"))
+
+    return render_template("forgot_password.html")
 
 
-# ---------------- LOGOUT -----------------
+# =====================================================
+# OTP VERIFICATION
+# =====================================================
 
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect(url_for("login"))
+@app.route("/verify-otp", methods=["GET", "POST"])
+def verify_otp():
+    if "reset_email" not in session:
+        return redirect(url_for("login"))
+
+    email = session["reset_email"]
+
+    if request.method == "POST":
+        entered_otp = request.form["otp"]
+        record = otp_store.get(email)
+
+        if not record:
+            return "OTP invalid or expired"
+
+        if time.time() > record["expires"]:
+            otp_store.pop(email)
+            return "OTP expired"
+
+        if entered_otp != record["otp"]:
+            return "Incorrect OTP"
+
+        otp_store.pop(email)
+        session["otp_verified"] = True
+        return redirect(url_for("reset_password"))
+
+    return render_template("verify_otp.html")
+
+
+# =====================================================
+# RESET PASSWORD (AFTER OTP)
+# =====================================================
+
+@app.route("/reset-password", methods=["GET", "POST"])
+def reset_password():
+    if not session.get("otp_verified"):
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+        new_password = request.form["password"]
+
+        if not is_strong_password(new_password):
+            return "Password is not strong enough"
+
+        conn = get_db()
+        conn.execute(
+            "UPDATE users SET password = ? WHERE email = ?",
+            (generate_password_hash(new_password), session["reset_email"])
+        )
+        conn.commit()
+        conn.close()
+
+        session.pop("otp_verified")
+        session.pop("reset_email")
+
+        return redirect(url_for("login"))
+
+    return render_template("reset_password.html")
 
 
 # =====================================================
