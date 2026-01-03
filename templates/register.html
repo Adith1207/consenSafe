@@ -1,51 +1,55 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="w-full max-w-md bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-8 mt-10">
-    <h2 class="text-3xl font-bold text-center mb-6">
-        Create Account
-    </h2>
+<section class="hero">
 
-    <form method="POST" class="space-y-4">
-        <input
-            name="username"
-            placeholder="Username"
-            required
-            class="w-full px-4 py-3 rounded-lg bg-white/20 focus:outline-none focus:ring-2 focus:ring-accent"
-        />
+    <!-- Left: Registration Form -->
+    <div class="hero-text" data-aos="fade-right">
+        <h1>Create Your SecureRail Account</h1>
+        <p>
+            Register once and access secure railway booking, verification,
+            and administration services.
+        </p>
 
-        <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            required
-            class="w-full px-4 py-3 rounded-lg bg-white/20 focus:outline-none focus:ring-2 focus:ring-accent"
-        />
+        <form method="POST" class="login-box">
 
-        <select
-            name="role"
-            required
-            class="w-full px-4 py-3 rounded-lg bg-white/20 text-white focus:outline-none focus:ring-2 focus:ring-accent"
-        >
-            <option value="" disabled selected>Select Role</option>
-            <option value="PASSENGER">Passenger</option>
-            <option value="TTE">Ticket Examiner</option>
-            <option value="ADMIN">Admin</option>
-        </select>
+            <input
+                name="username"
+                placeholder="Choose a username"
+                required
+            >
 
-        <button
-            type="submit"
-            class="w-full py-3 rounded-lg bg-accent hover:bg-blue-600 transition font-semibold">
-            Register
-        </button>
-    </form>
+            <input
+                type="password"
+                name="password"
+                placeholder="Create a strong password"
+                required
+            >
 
-    <p class="text-center text-sm mt-5 opacity-80">
-        Already have an account?
-        <a href="/login" class="text-blue-400 hover:underline">
-            Login
-        </a>
-    </p>
-</div>
+            <select name="role" required>
+                <option value="" disabled selected>Select account type</option>
+                <option value="PASSENGER">Passenger</option>
+                <option value="TTE">Ticket Examiner</option>
+                <option value="ADMIN">System Administrator</option>
+            </select>
+
+            <button>
+                <i class="fa-solid fa-user-plus"></i>
+                Create Account
+            </button>
+        </form>
+
+        <span class="helper">
+            Already registered?
+            <a href="/login">Go to login</a>
+        </span>
+    </div>
+
+    <!-- Right: Visual -->
+    <div class="hero-image" data-aos="fade-left">
+        <img src="{{ url_for('static', filename='train_register.jpg') }}">
+    </div>
+
+</section>
 
 {% endblock %}

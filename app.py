@@ -91,6 +91,18 @@ def dashboard():
         role=session["role"]
     )
 
+# ------ Change Password & Forgot Password ---------
+@app.route("/change-password")
+def change_password():
+    if "username" not in session:
+        return redirect(url_for("login"))
+    return "Change Password Page (To be implemented)"
+
+@app.route("/forgot-password")
+def forgot_password():
+    return "Forgot Password Flow (OTP / Email based)"
+
+
 
 # --------- USER LOGOUT ----------
 @app.route("/logout")

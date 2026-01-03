@@ -4,49 +4,70 @@
     <meta charset="UTF-8">
     <title>SecureRail</title>
 
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Tailwind Config -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#0f172a',
-                        accent: '#2563eb'
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='pro.css') }}">
 </head>
 
-<body class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+<script>
+function toggleMenu() {
+    const menu = document.getElementById("userDropdown");
+    menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+}
 
-    <!-- Navbar -->
-    <nav class="flex justify-between items-center px-8 py-5">
-        <div class="text-2xl font-bold tracking-wide">
-            🚆 SecureRail
+// Close when clicking outside
+document.addEventListener("click", function (e) {
+    const menu = document.querySelector(".user-menu");
+    const dropdown = document.getElementById("userDropdown");
+
+    if (menu && !menu.contains(e.target)) {
+        dropdown.style.display = "none";
+    }
+});
+</script>
+
+
+<body>
+
+<header class="navbar">
+    <div class="logo">🚆 SecureRail</div>
+
+    {% if session.get("username") %}
+    <div class="user-menu">
+        <div class="user-avatar" onclick="toggleMenu()">
+            <span class="avatar-circle">
+                {{ session.username[0]|upper }}
+            </span>
+            <span class="avatar-name">{{ session.username }}</span>
+            <i class="fa-solid fa-caret-down"></i>
         </div>
 
-        {% if session.get("username") %}
-        <div class="flex items-center gap-4">
-            <span class="text-sm opacity-80">
-                {{ session.get("username") }} ({{ session.get("role") }})
-            </span>
-            <a href="/logout"
-               class="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 transition">
-                Logout
+        <div class="dropdown" id="userDropdown">
+            <a href="/change-password">
+                <i class="fa-solid fa-key"></i> Change Password
+            </a>
+            <a href="/logout">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
             </a>
         </div>
-        {% endif %}
-    </nav>
+    </div>
+    {% endif %}
+</header>
 
-    <!-- Main Content -->
-    <main class="flex justify-center items-center px-4">
-        {% block content %}{% endblock %}
-    </main>
+
+{% block content %}{% endblock %}
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+  AOS.init({ duration: 800, once: true });
+</script>
 
 </body>
 </html>
