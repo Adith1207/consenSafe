@@ -203,7 +203,7 @@ def change_password():
         conn.close()
         return "Old password incorrect"
 
-    return "Change Password UI already implemented"
+    return render_template("reset_password.html")
 
 
 # =====================================================
