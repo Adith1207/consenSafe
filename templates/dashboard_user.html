@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="dashboard">
+
+    <h2 data-aos="fade-up">Welcome, {{ username }}</h2>
+
+    <div class="card-grid">
+
+        {% if role == "PASSENGER" %}
+        <div class="feature-card" data-aos="zoom-in">
+            <i class="fa-solid fa-ticket"></i>
+            <h3>Book Tickets</h3>
+            <p>Search trains and book securely.</p>
+        </div>
+        {% endif %}
+
+        {% if role == "TTE" %}
+        <div class="feature-card" data-aos="zoom-in">
+            <i class="fa-solid fa-qrcode"></i>
+            <h3>Verify Tickets</h3>
+            <p>Cryptographically verify ticket integrity.</p>
+        </div>
+        {% endif %}
+
+        {% if role == "ADMIN" %}
+        <div class="feature-card" data-aos="zoom-in">
+            <i class="fa-solid fa-gear"></i>
+            <h3>Admin Panel</h3>
+            <p>Manage users and security policies.</p>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+
+{% endblock %}

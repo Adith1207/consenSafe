@@ -6,7 +6,8 @@ import time
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.secret_key = "securerail_secret_key"
+app.secret_key = "consensafe_secret_key"
+ALLOWED_ROLES = ("user", "app", "admin")
 DB_NAME = "database.db"
 
 # =====================================================
@@ -81,6 +82,8 @@ def register():
         email = request.form["email"].strip().lower()
         password = request.form["password"]
         role = request.form["role"]
+        if role not in ALLOWED_ROLES:
+            return "Invalid role selection"
 
         if not is_strong_password(password):
             return "Password must be strong (8+ chars, upper, lower, number, special)"
@@ -121,6 +124,7 @@ def login():
         conn.close()
 
         if user and check_password_hash(user["password"], password):
+            session["user_id"] = user["id"]
             session["username"] = user["username"]
             session["email"] = user["email"]
             session["role"] = user["role"]
@@ -137,14 +141,22 @@ def login():
 
 @app.route("/dashboard")
 def dashboard():
-    if "username" not in session:
+    if "user_id" not in session:
         return redirect(url_for("login"))
 
-    return render_template(
-        "dashboard.html",
-        username=session["username"],
-        role=session["role"]
-    )
+    role = session["role"]
+
+    if role == "user":
+        return render_template("dashboard_user.html", username=session["username"])
+
+    elif role == "app":
+        return render_template("dashboard_app.html", username=session["username"])
+
+    elif role == "admin":
+        return render_template("dashboard_admin.html", username=session["username"])
+
+    else:
+        return "Unauthorized role", 403
 
 
 # =====================================================
