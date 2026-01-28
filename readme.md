@@ -1,10 +1,5 @@
 # ConsentSafe – Secure Consent-Based Data Access System
 
-**Course:** 23CSE313 – Foundations of Cyber Security  
-**Lab Evaluation:** 1  
-**Institution:** Amrita Vishwa Vidyapeetham  
-**Department:** Computer Science and Engineering
-
 ---
 
 ## 1. Project Overview
