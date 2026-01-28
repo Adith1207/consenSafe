@@ -2,34 +2,22 @@
 {% block content %}
 
 <section class="dashboard">
-
     <h2 data-aos="fade-up">Welcome, {{ username }}</h2>
+    <p class="subtitle">Role: Data Requester</p>
 
     <div class="card-grid">
 
-        {% if role == "PASSENGER" %}
         <div class="feature-card" data-aos="zoom-in">
-            <i class="fa-solid fa-ticket"></i>
-            <h3>Book Tickets</h3>
-            <p>Search trains and book securely.</p>
+            <i class="fa-solid fa-handshake"></i>
+            <h3>Request Data Access</h3>
+            <p>Request user data with defined purpose and duration.</p>
         </div>
-        {% endif %}
 
-        {% if role == "TTE" %}
         <div class="feature-card" data-aos="zoom-in">
-            <i class="fa-solid fa-qrcode"></i>
-            <h3>Verify Tickets</h3>
-            <p>Cryptographically verify ticket integrity.</p>
+            <i class="fa-solid fa-list-check"></i>
+            <h3>Request Status</h3>
+            <p>Track approved and denied consent requests.</p>
         </div>
-        {% endif %}
-
-        {% if role == "ADMIN" %}
-        <div class="feature-card" data-aos="zoom-in">
-            <i class="fa-solid fa-gear"></i>
-            <h3>Admin Panel</h3>
-            <p>Manage users and security policies.</p>
-        </div>
-        {% endif %}
 
     </div>
 </section>
