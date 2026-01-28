@@ -1,31 +1,46 @@
 {% extends "base.html" %}
 {% block content %}
 
-<section class="dashboard">
-    <h2 data-aos="fade-up">Welcome, {{ username }}</h2>
-    <p class="subtitle">Role: Data Owner</p>
+<div class="dashboard">
 
-    <div class="card-grid">
-
-        <div class="feature-card" data-aos="zoom-in">
-            <i class="fa-solid fa-database"></i>
-            <h3>My Data</h3>
-            <p>View and manage your encrypted personal data.</p>
-        </div>
-
-        <div class="feature-card" data-aos="zoom-in">
-            <i class="fa-solid fa-user-shield"></i>
-            <h3>Consent Requests</h3>
-            <p>Approve or deny data access requests.</p>
-        </div>
-
-        <div class="feature-card" data-aos="zoom-in">
-            <i class="fa-solid fa-lock"></i>
-            <h3>Active Consents</h3>
-            <p>View and revoke granted permissions.</p>
-        </div>
-
+  <div class="dashboard-header">
+    <div>
+      <h1>Dashboard</h1>
+      <p class="welcome-text">Welcome back, <strong>{{ username }}</strong></p>
     </div>
-</section>
+    <span class="role-badge user">Data Owner</span>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Your Privacy Controls</h2>
+
+    <div class="dashboard-grid">
+      <div class="dashboard-card">
+        <i class="fa-solid fa-database"></i>
+        <h3>My Data</h3>
+        <p>View and manage your encrypted personal information securely.</p>
+      </div>
+
+      <div class="dashboard-card">
+        <i class="fa-solid fa-user-shield"></i>
+        <h3>Consent Requests</h3>
+        <p>Review and approve applications requesting access to your data.</p>
+      </div>
+
+      <div class="dashboard-card">
+        <i class="fa-solid fa-lock"></i>
+        <h3>Active Consents</h3>
+        <p>Monitor and revoke permissions you have previously granted.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-bar">
+    <a href="{{ url_for('my_consents') }}" class="primary-btn">
+      Manage My Consents
+    </a>
+  </div>
+
+</div>
 
 {% endblock %}

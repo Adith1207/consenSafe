@@ -14,11 +14,11 @@ app = Flask(__name__)
 app.secret_key = "consensafe_secret_key"
 app.permanent_session_lifetime = timedelta(minutes=10)
 
-ALLOWED_ROLES = ("user", "app", "admin")
 DB_NAME = "database.db"
+ALLOWED_ROLES = ("user", "app", "admin")
 
 # =====================================================
-# OTP STORE (IN-MEMORY FOR LAB)
+# OTP STORE (IN-MEMORY)
 # =====================================================
 
 otp_store = {}
@@ -88,16 +88,16 @@ def init_db():
     conn.close()
 
 # =====================================================
-# SESSION TIMEOUT ENFORCEMENT
+# SESSION TIMEOUT (SECURITY HARDENING)
 # =====================================================
 
 @app.before_request
 def enforce_session_timeout():
     if "user_id" in session:
         now = time.time()
-        last_activity = session.get("last_activity")
+        last = session.get("last_activity")
 
-        if last_activity and now - last_activity > 600:
+        if last and now - last > 600:
             session.clear()
             return redirect(url_for("login"))
 
@@ -117,15 +117,15 @@ def is_strong_password(password):
     )
 
 # =====================================================
-# CONSENT CHECK (AUTHORIZATION)
+# AUTHORIZATION: CONSENT CHECK
 # =====================================================
 
 def has_consent(user_id, app_id, field):
     conn = get_db()
     consent = conn.execute("""
         SELECT * FROM consents
-        WHERE user_id = ? AND app_id = ?
-        AND status = 'approved'
+        WHERE user_id=? AND app_id=?
+        AND status='approved'
         AND expiry > datetime('now')
     """, (user_id, app_id)).fetchone()
 
@@ -167,25 +167,25 @@ def register():
         role = request.form["role"]
 
         if role not in ALLOWED_ROLES:
-            return "Invalid role selection"
+            return "Invalid role"
 
         if role == "admin":
             return "Admin accounts are created by system only"
 
         if not is_strong_password(password):
-            return "Password does not meet security requirements"
+            return "Weak password"
 
         try:
             conn = get_db()
             conn.execute(
-                "INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)",
+                "INSERT INTO users (username,email,password,role) VALUES (?,?,?,?)",
                 (username, email, generate_password_hash(password), role)
             )
             conn.commit()
             conn.close()
             return redirect(url_for("login"))
         except sqlite3.IntegrityError:
-            return "Username or email already exists"
+            return "User already exists"
 
     return render_template("register.html")
 
@@ -200,11 +200,12 @@ def login():
         password = request.form["password"]
 
         conn = get_db()
-        user = conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+        user = conn.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
         conn.close()
 
         if user and check_password_hash(user["password"], password):
             session.clear()
+            session.permanent = False 
             session["user_id"] = user["id"]
             session["username"] = user["username"]
             session["email"] = user["email"]
@@ -229,12 +230,12 @@ def dashboard():
 
     if role == "user":
         return render_template("dashboard_user.html", username=session["username"])
-    elif role == "app":
+    if role == "app":
         return render_template("dashboard_app.html", username=session["username"])
-    elif role == "admin":
+    if role == "admin":
         return render_template("dashboard_admin.html", username=session["username"])
 
-    return "Unauthorized role", 403
+    return "Unauthorized", 403
 
 # =====================================================
 # LOGOUT
@@ -246,7 +247,7 @@ def logout():
     return redirect(url_for("login"))
 
 # =====================================================
-# CHANGE PASSWORD (LOGGED-IN USER)
+# CHANGE PASSWORD
 # =====================================================
 
 @app.route("/change-password", methods=["GET", "POST"])
@@ -263,13 +264,13 @@ def change_password():
 
         conn = get_db()
         user = conn.execute(
-            "SELECT * FROM users WHERE id = ?",
+            "SELECT * FROM users WHERE id=?",
             (session["user_id"],)
         ).fetchone()
 
         if user and check_password_hash(user["password"], old):
             conn.execute(
-                "UPDATE users SET password = ? WHERE id = ?",
+                "UPDATE users SET password=? WHERE id=?",
                 (generate_password_hash(new), session["user_id"])
             )
             conn.commit()
@@ -291,7 +292,7 @@ def forgot_password():
         email = request.form["email"].strip().lower()
 
         conn = get_db()
-        user = conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+        user = conn.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
         conn.close()
 
         if not user:
@@ -306,10 +307,6 @@ def forgot_password():
 
     return render_template("forgot_password.html")
 
-# =====================================================
-# VERIFY OTP
-# =====================================================
-
 @app.route("/verify-otp", methods=["GET", "POST"])
 def verify_otp():
     if "reset_email" not in session:
@@ -319,6 +316,7 @@ def verify_otp():
 
     if request.method == "POST":
         record = otp_store.get(email)
+
         if not record or time.time() > record["expires"]:
             return "OTP expired"
 
@@ -330,10 +328,6 @@ def verify_otp():
         return redirect(url_for("reset_password"))
 
     return render_template("verify_otp.html")
-
-# =====================================================
-# RESET PASSWORD (OTP VERIFIED)
-# =====================================================
 
 @app.route("/reset-password", methods=["GET", "POST"])
 def reset_password():
@@ -348,7 +342,7 @@ def reset_password():
 
         conn = get_db()
         conn.execute(
-            "UPDATE users SET password = ? WHERE email = ?",
+            "UPDATE users SET password=? WHERE email=?",
             (generate_password_hash(password), session["reset_email"])
         )
         conn.commit()
@@ -358,6 +352,69 @@ def reset_password():
         return redirect(url_for("login"))
 
     return render_template("reset_password.html")
+
+# =====================================================
+# STEP 3: CONSENT WORKFLOW
+# =====================================================
+
+@app.route("/request-access", methods=["GET", "POST"])
+def request_access():
+    if session.get("role") != "app":
+        return "Unauthorized", 403
+
+    if request.method == "POST":
+        user_id = request.form["user_id"]
+        fields = ",".join(request.form.getlist("fields"))
+        purpose = request.form["purpose"]
+        expiry = request.form["expiry"]
+
+        conn = get_db()
+        conn.execute("""
+            INSERT INTO consents
+            (user_id, app_id, allowed_fields, purpose, expiry, status, consent_hash, signature)
+            VALUES (?, ?, ?, ?, ?, 'approved', 'hash_placeholder', 'sig_placeholder')
+        """, (user_id, session["user_id"], fields, purpose, expiry))
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for("dashboard"))
+
+    conn = get_db()
+    users = conn.execute("SELECT id, username FROM users WHERE role='user'").fetchall()
+    conn.close()
+
+    return render_template("request_access.html", users=users)
+
+@app.route("/my-consents")
+def my_consents():
+    if session.get("role") != "user":
+        return "Unauthorized", 403
+
+    conn = get_db()
+    consents = conn.execute("""
+        SELECT consents.*, users.username AS app_name
+        FROM consents
+        JOIN users ON consents.app_id = users.id
+        WHERE consents.user_id = ?
+    """, (session["user_id"],)).fetchall()
+    conn.close()
+
+    return render_template("my_consents.html", consents=consents)
+
+@app.route("/revoke-consent/<int:consent_id>")
+def revoke_consent(consent_id):
+    if session.get("role") != "user":
+        return "Unauthorized", 403
+
+    conn = get_db()
+    conn.execute(
+        "UPDATE consents SET status='revoked' WHERE id=? AND user_id=?",
+        (consent_id, session["user_id"])
+    )
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("my_consents"))
 
 # =====================================================
 # START APP

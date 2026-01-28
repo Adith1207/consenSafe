@@ -1,49 +1,31 @@
-{% extends "base.html" %}
+{% extends "auth_base.html" %}
 {% block content %}
 
-<section class="hero-bg login-bg">
+<div class="hero-bg login-bg">
+  <div class="login-card">
 
+    <h1>Welcome to ConsenSafe</h1>
+    <p class="subtitle">
+      Secure, consent-based access to sensitive data.
+    </p>
 
-    <div class="overlay"></div>
+    <form method="POST">
+      <input type="email" name="email" placeholder="Email address" required>
+      <input type="password" name="password" placeholder="Password" required>
 
-    <div class="login-card" data-aos="zoom-in">
-        <h1>Book Trains. Securely.</h1>
-        <p class="subtitle">
-            A next-generation railway reservation system with
-            security-first authentication.
-        </p>
+      <div class="forgot-password">
+        <a href="{{ url_for('forgot_password') }}">Forgot password?</a>
+      </div>
 
-        <form method="POST">
-            <input
-                type="email"
-                name="email"
-                placeholder="Email address"
-                required
-            >
+      <button type="submit">Sign In</button>
+    </form>
 
-
-            <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                required
-            >
-
-            <div class="forgot-password">
-                <a href="/forgot-password">Forgot password?</a>
-            </div>
-
-            <button type="submit">
-                Login
-            </button>
-        </form>
-
-        <div class="helper">
-            New user?
-            <a href="/register">Create an account</a>
-        </div>
+    <div class="helper">
+      New user?
+      <a href="{{ url_for('register') }}">Create an account</a>
     </div>
 
-</section>
+  </div>
+</div>
 
 {% endblock %}

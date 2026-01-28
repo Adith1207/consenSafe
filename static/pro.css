@@ -3,229 +3,314 @@
 ===================================================== */
 
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
 }
 
 body {
-    margin: 0;
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #f9fafb;
-    color: #111827;
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #111827;
+  background: #f5f7fb;
 }
 
 /* =====================================================
-   NAVBAR
+   NAVBAR (DASHBOARD ONLY)
 ===================================================== */
 
 .navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 18px 40px;
-    background: #ffffff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    position: relative;
-    z-index: 10;
+  height: 64px;
+  padding: 0 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .logo {
-    font-weight: 700;
-    font-size: 20px;
+  font-weight: 700;
+  font-size: 20px;
+  color: #4f46e5;
 }
 
-.nav-user {
-    font-size: 14px;
+.user-menu {
+  position: relative;
 }
 
-.nav-user a {
-    margin-left: 16px;
-    color: #dc2626;
-    text-decoration: none;
-    font-weight: 500;
+.user-avatar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.avatar-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.avatar-name {
+  font-size: 14px;
+  font-weight: 500;
 }
 
 /* =====================================================
-   FULLSCREEN HERO BACKGROUND
+   AUTH PAGES (LOGIN / REGISTER)
 ===================================================== */
-
 
 .hero-bg {
-    position: relative;
-    height: calc(100vh - 64px);
-    width: 100%;
-    background-size: cover;
-    background-position: center;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-
-/* Subtle dark overlay – professional look */
+/* Dark overlay */
 .hero-bg::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-        rgba(0, 0, 0, 0.45),
-        rgba(0, 0, 0, 0.45)
-    );
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
 }
 
-/* LOGIN PAGE BACKGROUND */
+/* Background images */
 .login-bg {
-    background-image: url("/static/train.jpg");
+  background-image: url("/static/train.jpg");
 }
 
-/* REGISTER PAGE BACKGROUND */
 .register-bg {
-    background-image: url("/static/train_register.jpg");
+  background-image: url("/static/train_register.jpg");
 }
 
-
-
-/* =====================================================
-   LOGIN / REGISTER CARD
-===================================================== */
-
+/* Auth Card */
 .login-card {
-    position: relative;
-    z-index: 2;
-
-    width: 420px;
-    background: rgba(255, 255, 255, 0.92);
-    padding: 36px 34px;
-
-    border-radius: 18px;
-    box-shadow:
-        0 20px 45px rgba(0,0,0,0.18),
-        inset 0 1px 0 rgba(255,255,255,0.6);
-
-    animation: slideUp 0.8s ease;
+  position: relative;
+  z-index: 2;
+  width: 420px;
+  max-width: 100%;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 36px 34px;
+  border-radius: 18px;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+  animation: slideUp 0.6s ease;
+  margin: 0 16px;
 }
-
 
 .login-card h1 {
-    margin: 0;
-    font-size: 28px;
-    font-weight: 700;
-    color: #111827;
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
 }
 
 .login-card .subtitle {
-    font-size: 14px;
-    color: #4b5563;
-    margin: 10px 0 24px;
-    line-height: 1.5;
+  font-size: 14px;
+  color: #4b5563;
+  margin: 10px 0 24px;
+  line-height: 1.5;
 }
 
 .login-card form {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .login-card input,
 .login-card select {
-    padding: 12px 14px;
-    font-size: 14px;
-    border-radius: 8px;
-    border: 1px solid #d1d5db;
-    font-family: inherit;
+  padding: 12px 14px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-family: inherit;
 }
 
 .login-card input:focus,
 .login-card select:focus {
-    outline: none;
-    border-color: #dc2626;
-    box-shadow: 0 0 0 2px rgba(220,38,38,0.15);
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 2px rgba(79,70,229,0.2);
 }
 
 .login-card button {
-    margin-top: 6px;
-    padding: 12px;
-    font-size: 15px;
-    font-weight: 500;
-    background: #dc2626;
-    color: #ffffff;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-top: 6px;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .login-card button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(220,38,38,0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(79,70,229,0.35);
 }
 
 .login-card .helper {
-    margin-top: 18px;
-    font-size: 13px;
-    color: #374151;
+  margin-top: 18px;
+  font-size: 13px;
+  color: #374151;
 }
 
 .login-card .helper a {
-    color: #dc2626;
-    text-decoration: none;
-    font-weight: 500;
+  color: #4f46e5;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.forgot-password {
+  text-align: right;
+  font-size: 13px;
+  margin-top: -6px;
+}
+
+.forgot-password a {
+  color: #4f46e5;
+  text-decoration: none;
+  font-weight: 500;
 }
 
 /* =====================================================
-   DASHBOARD
+   DASHBOARD LAYOUT
 ===================================================== */
 
 .dashboard {
-    padding: 60px 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 36px 24px 80px;
 }
 
-.dashboard h2 {
-    font-size: 28px;
-    margin-bottom: 10px;
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
 }
 
-.card-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 30px;
-    margin-top: 40px;
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.welcome-text {
+  margin-top: 6px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.role-badge {
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.role-badge.user {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.role-badge.app {
+  background: #fae8ff;
+  color: #86198f;
 }
 
 /* =====================================================
-   FEATURE CARDS
+   DASHBOARD SECTIONS & CARDS
 ===================================================== */
 
-.feature-card {
-    background: #ffffff;
-    padding: 28px;
-    border-radius: 16px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-    cursor: pointer;
+.section {
+  margin-top: 36px;
 }
 
-.feature-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+.section-title {
+  font-size: 18px;
+  margin-bottom: 18px;
+  font-weight: 600;
 }
 
-.feature-card i {
-    font-size: 30px;
-    color: #dc2626;
-    margin-bottom: 14px;
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
 }
 
-.feature-card h3 {
-    margin: 0 0 6px;
-    font-size: 18px;
+.dashboard-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 26px;
+  box-shadow: 0 14px 35px rgba(0,0,0,0.06);
+  border: 1px solid #eef0f4;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-.feature-card p {
-    margin: 0;
-    font-size: 14px;
-    color: #4b5563;
-    line-height: 1.5;
+.dashboard-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 22px 55px rgba(0,0,0,0.1);
+}
+
+.dashboard-card i {
+  font-size: 26px;
+  color: #4f46e5;
+  margin-bottom: 14px;
+}
+
+.dashboard-card h3 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.dashboard-card p {
+  margin-top: 6px;
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+/* =====================================================
+   ACTION BAR
+===================================================== */
+
+.action-bar {
+  margin-top: 48px;
+  padding: 20px 24px;
+  background: #ffffff;
+  border-radius: 16px;
+  display: flex;
+  justify-content: flex-end;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: #ffffff;
+  padding: 12px 26px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.primary-btn:hover {
+  opacity: 0.95;
 }
 
 /* =====================================================
@@ -233,33 +318,34 @@ body {
 ===================================================== */
 
 @keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* =====================================================
    RESPONSIVE
 ===================================================== */
 
-@media (max-width: 900px) {
-    .hero-bg {
-        justify-content: center;
-        padding-left: 0;
-    }
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 28px 16px;
+  }
 
-    .login-card {
-        width: 90%;
-    }
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
 
-    .dashboard {
-        padding: 40px 20px;
-    }
+  .login-card {
+    width: 100%;
+  }
 }
 
 /* =====================================================
@@ -267,73 +353,55 @@ body {
 ===================================================== */
 
 .user-menu {
-    position: relative;
-    display: flex;
-    align-items: center;
+  position: relative;
 }
 
-.user-avatar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    font-size: 14px;
+.user-avatar i {
+  font-size: 12px;
+  margin-left: 4px;
+  color: #6b7280;
 }
 
-.avatar-circle {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: #dc2626;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
+/* Dropdown container */
+.dropdown-menu {
+  position: absolute;
+  top: 52px;
+  right: 0;
+  width: 200px;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 20px 45px rgba(0,0,0,0.18);
+  overflow: hidden;
+  display: none;
+  flex-direction: column;
+  z-index: 100;
 }
 
-.avatar-name {
-    font-weight: 500;
+/* Show state */
+.dropdown-menu.show {
+  display: flex;
 }
 
-.dropdown {
-    position: absolute;
-    top: 48px;
-    right: 0;
-    width: 180px;
-
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.18);
-
-    display: none;
-    flex-direction: column;
-    overflow: hidden;
-    z-index: 50;
+/* Dropdown links */
+.dropdown-menu a {
+  padding: 14px 18px;
+  font-size: 14px;
+  color: #111827;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.dropdown a {
-    padding: 12px 14px;
-    font-size: 14px;
-    color: #111827;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.dropdown-menu a:hover {
+  background: #f3f4f6;
 }
 
-.dropdown a:hover {
-    background: #f3f4f6;
+/* Logout danger */
+.dropdown-menu a.danger {
+  color: #dc2626;
 }
 
-.forgot-password {
-    text-align: right;
-    font-size: 13px;
-    margin-top: -6px;
-}
-
-.forgot-password a {
-    color: #dc2626;
-    text-decoration: none;
-    font-weight: 500;
+.dropdown-menu a.danger:hover {
+  background: #fee2e2;
 }

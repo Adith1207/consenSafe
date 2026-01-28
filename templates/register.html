@@ -1,61 +1,32 @@
-{% extends "base.html" %}
+{% extends "auth_base.html" %}
 {% block content %}
 
-<section class="hero-bg register-bg">
+<div class="hero-bg register-bg">
+  <div class="login-card">
+    <h1>Create Account</h1>
+    <p class="subtitle">
+      Register securely with role-based access.
+    </p>
 
+    <form method="POST">
+      <input type="text" name="username" placeholder="Username" required>
+      <input type="email" name="email" placeholder="Email address" required>
+      <input type="password" name="password" placeholder="Password" required>
 
-    <div class="login-card">
-        <h1>Create Your SecureRail Account</h1>
-        <p class="subtitle">
-            Register once to book tickets, verify journeys,
-            and access secure railway services.
-        </p>
+      <select name="role" required>
+        <option value="">Select Role</option>
+        <option value="user">Data Owner</option>
+        <option value="app">Data Requester</option>
+      </select>
 
-        <form method="POST">
-            <input
-                name="username"
-                placeholder="Choose a username"
-                required
-            >
+      <button type="submit">Create Account</button>
+    </form>
 
-            <input
-                type="email"
-                name="email"
-                placeholder="Email address"
-                required
-            >
-
-
-            <input
-                type="password"
-                name="password"
-                placeholder="Create a password"
-                required
-            >
-
-            <small style="font-size:13px; color:#6b7280;">
-                Password must be at least 8 characters and include uppercase,
-                lowercase, number, and special character.
-            </small>
-
-
-            <select name="role" required>
-                <option value="user">User (Data Owner)</option>
-                <option value="app">App (Data Requester)</option>
-                <option value="admin">Admin</option>
-            </select>
-
-            <button type="submit">
-                Create Account
-            </button>
-        </form>
-
-        <div class="helper">
-            Already have an account?
-            <a href="/login">Login here</a>
-        </div>
+    <div class="helper">
+      Already have an account?
+      <a href="{{ url_for('login') }}">Sign in</a>
     </div>
-
-</section>
+  </div>
+</div>
 
 {% endblock %}

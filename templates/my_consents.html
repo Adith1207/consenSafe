@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>My Consents</h2>
+
+<table>
+<tr>
+    <th>App</th>
+    <th>Fields</th>
+    <th>Purpose</th>
+    <th>Expiry</th>
+    <th>Status</th>
+    <th>Action</th>
+</tr>
+
+{% for c in consents %}
+<tr>
+    <td>{{ c.app_name }}</td>
+    <td>{{ c.allowed_fields }}</td>
+    <td>{{ c.purpose }}</td>
+    <td>{{ c.expiry }}</td>
+    <td>{{ c.status }}</td>
+    <td>
+        {% if c.status == "approved" %}
+        <a href="{{ url_for('revoke_consent', consent_id=c.id) }}">Revoke</a>
+        {% endif %}
+    </td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}

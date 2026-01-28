@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Request Data Access</h2>
+
+<form method="POST">
+    <label>Select User</label>
+    <select name="user_id" required>
+        {% for u in users %}
+        <option value="{{ u.id }}">{{ u.username }}</option>
+        {% endfor %}
+    </select>
+
+    <label>Data Requested</label><br>
+    <input type="checkbox" name="fields" value="email"> Email<br>
+    <input type="checkbox" name="fields" value="phone"> Phone<br>
+
+    <label>Purpose</label>
+    <input type="text" name="purpose" required>
+
+    <label>Expiry Date</label>
+    <input type="date" name="expiry" required>
+
+    <button type="submit">Submit Request</button>
+</form>
+{% endblock %}

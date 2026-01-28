@@ -1,72 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>SecureRail</title>
+  <meta charset="UTF-8">
+  <title>ConsenSafe</title>
 
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-
-    <!-- AOS Animation -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-
-    <link rel="stylesheet" href="{{ url_for('static', filename='pro.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='pro.css') }}">
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-
-<script>
-function toggleMenu() {
-    const menu = document.getElementById("userDropdown");
-    menu.style.display = menu.style.display === "flex" ? "none" : "flex";
-}
-
-// Close when clicking outside
-document.addEventListener("click", function (e) {
-    const menu = document.querySelector(".user-menu");
-    const dropdown = document.getElementById("userDropdown");
-
-    if (menu && !menu.contains(e.target)) {
-        dropdown.style.display = "none";
-    }
-});
-</script>
-
 
 <body>
 
-<header class="navbar">
-    <div class="logo">🚆 SecureRail</div>
+<nav class="navbar">
+  <div class="logo">
+    🔐 ConsenSafe
+  </div>
 
-    {% if session.get("username") %}
-    <div class="user-menu">
-        <div class="user-avatar" onclick="toggleMenu()">
-            <span class="avatar-circle">
-                {{ session.username[0]|upper }}
-            </span>
-            <span class="avatar-name">{{ session.username }}</span>
-            <i class="fa-solid fa-caret-down"></i>
-        </div>
-
-        <div class="dropdown" id="userDropdown">
-            <a href="/change-password">
-                <i class="fa-solid fa-key"></i> Change Password
-            </a>
-            <a href="/logout">
-                <i class="fa-solid fa-right-from-bracket"></i> Logout
-            </a>
-        </div>
+  {% if session.username %}
+  <div class="user-menu">
+    <!-- CLICKABLE AVATAR -->
+    <div class="user-avatar" onclick="toggleDropdown()">
+      <div class="avatar-circle">
+        {{ session.username[0]|upper }}
+      </div>
+      <span class="avatar-name">{{ session.username }}</span>
+      <i class="fa-solid fa-chevron-down"></i>
     </div>
-    {% endif %}
-</header>
 
+    <!-- DROPDOWN -->
+    <div class="dropdown-menu" id="userDropdown">
+      <a href="{{ url_for('change_password') }}">
+        <i class="fa-solid fa-key"></i>
+        Change Password
+      </a>
+      <a href="{{ url_for('logout') }}" class="danger">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        Logout
+      </a>
+    </div>
+  </div>
+  {% endif %}
+</nav>
 
 {% block content %}{% endblock %}
 
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<!-- DROPDOWN SCRIPT -->
 <script>
-  AOS.init({ duration: 800, once: true });
+  function toggleDropdown() {
+    document.getElementById("userDropdown")
+      .classList.toggle("show");
+  }
+
+  // Close dropdown when clicking outside
+  window.addEventListener("click", function (e) {
+    if (!e.target.closest(".user-menu")) {
+      const dropdown = document.getElementById("userDropdown");
+      if (dropdown) dropdown.classList.remove("show");
+    }
+  });
 </script>
 
 </body>
