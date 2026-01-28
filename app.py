@@ -83,7 +83,7 @@ def init_db():
             allowed_fields TEXT NOT NULL,
             purpose TEXT NOT NULL,
             expiry DATETIME NOT NULL,
-            status TEXT CHECK(status IN ('approved','revoked')) NOT NULL,
+            status TEXT CHECK(status IN ('pending','approved','revoked')) NOT NULL,
             consent_hash TEXT NOT NULL,
             signature TEXT NOT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -342,11 +342,49 @@ def dashboard():
     role = session["role"]
 
     if role == "user":
-        return render_template("dashboard_user.html", username=session["username"])
+        return render_template(
+            "dashboard_user.html",
+            username=session["username"]
+        )
+
     if role == "app":
-        return render_template("dashboard_app.html", username=session["username"])
+        return render_template(
+            "dashboard_app.html",
+            username=session["username"]
+        )
+
     if role == "admin":
-        return render_template("dashboard_admin.html", username=session["username"])
+        conn = get_db()
+
+        stats = {
+            "total_users": conn.execute(
+                "SELECT COUNT(*) FROM users WHERE role='user'"
+            ).fetchone()[0],
+
+            "total_apps": conn.execute(
+                "SELECT COUNT(*) FROM users WHERE role='app'"
+            ).fetchone()[0],
+
+            "active_consents": conn.execute(
+                "SELECT COUNT(*) FROM consents WHERE status='approved'"
+            ).fetchone()[0],
+
+            "revoked_consents": conn.execute(
+                "SELECT COUNT(*) FROM consents WHERE status='revoked'"
+            ).fetchone()[0],
+
+            "audit_logs": conn.execute(
+                "SELECT COUNT(*) FROM audit_logs"
+            ).fetchone()[0],
+        }
+
+        conn.close()
+
+        return render_template(
+            "dashboard_admin.html",
+            username=session["username"],
+            stats=stats
+        )
 
     return "Unauthorized", 403
 
@@ -497,7 +535,7 @@ def request_access():
         conn.execute("""
         INSERT INTO consents
         (user_id, app_id, allowed_fields, purpose, expiry, status, consent_hash, signature)
-        VALUES (?, ?, ?, ?, ?, 'approved', ?, ?)
+        VALUES (?, ?, ?, ?, ?, 'pending', ?, ?)
         """, (user_id, session["user_id"], fields, purpose, expiry, consent_hash, signature))
 
         conn.commit()
@@ -511,8 +549,59 @@ def request_access():
 
     return render_template("request_access.html", users=users)
 
+@app.route("/approve-consent/<int:consent_id>")
+def approve_consent(consent_id):
+    if session.get("role") != "user":
+        return "Unauthorized", 403
+
+    conn = get_db()
+
+    # Update only if it belongs to this user and is pending
+    result = conn.execute("""
+        UPDATE consents
+        SET status = 'approved'
+        WHERE id = ? AND user_id = ? AND status = 'pending'
+    """, (consent_id, session["user_id"]))
+
+    if result.rowcount == 0:
+        conn.close()
+        return "Invalid or already processed consent", 400
+
+    # 🧾 Audit log
+    conn.execute(
+        "INSERT INTO audit_logs (actor_id, action) VALUES (?, ?)",
+        (session["user_id"], f"Approved consent {consent_id}")
+    )
+
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("my_consents"))
+
 @app.route("/my-consents")
 def my_consents():
+    if session.get("role") != "user":
+        return "Unauthorized", 403
+
+    status = request.args.get("status", "approved")  # default = active consents
+
+    conn = get_db()
+    consents = conn.execute("""
+        SELECT consents.*, users.username AS app_name
+        FROM consents
+        JOIN users ON consents.app_id = users.id
+        WHERE consents.user_id = ? AND consents.status = ?
+    """, (session["user_id"], status)).fetchall()
+    conn.close()
+
+    return render_template(
+        "my_consents.html",
+        consents=consents,
+        status=status
+    )
+
+@app.route("/consent-requests")
+def consent_requests():
     if session.get("role") != "user":
         return "Unauthorized", 403
 
@@ -522,10 +611,12 @@ def my_consents():
         FROM consents
         JOIN users ON consents.app_id = users.id
         WHERE consents.user_id = ?
-    """, (session["user_id"],)).fetchall()
+        AND consents.status = 'pending'
+    """, (session["user_id"],)).fetchall()  
     conn.close()
 
-    return render_template("my_consents.html", consents=consents)
+    return render_template("consent_requests.html", consents=consents)
+
 
 @app.route("/revoke-consent/<int:consent_id>")
 def revoke_consent(consent_id):
@@ -533,10 +624,18 @@ def revoke_consent(consent_id):
         return "Unauthorized", 403
 
     conn = get_db()
+
+    conn.execute("""
+        UPDATE consents
+        SET status = 'revoked'
+        WHERE id = ? AND user_id = ? AND status = 'approved'
+    """, (consent_id, session["user_id"]))
+
     conn.execute(
-        "UPDATE consents SET status='revoked' WHERE id=? AND user_id=?",
-        (consent_id, session["user_id"])
+        "INSERT INTO audit_logs (actor_id, action) VALUES (?, ?)",
+        (session["user_id"], f"Revoked consent {consent_id}")
     )
+
     conn.commit()
     conn.close()
 
@@ -568,9 +667,19 @@ def access_data(user_id, field):
         conn.close()
         return "Consent integrity violation", 403
 
-    if field not in consent["allowed_fields"].split(","):
+    allowed_fields = [f.strip() for f in consent["allowed_fields"].split(",")]
+
+    print("FIELD FROM URL:", repr(field))
+    print("RAW allowed_fields:", repr(consent["allowed_fields"]))
+    print("SPLIT allowed_fields:", [repr(f) for f in consent["allowed_fields"].split(",")])
+
+    allowed_fields = [f.strip() for f in consent["allowed_fields"].split(",")]
+    print("CLEAN allowed_fields:", allowed_fields)
+
+    if field not in allowed_fields:
         conn.close()
         return "Field not allowed", 403
+        
 
     user_data = conn.execute("""
         SELECT email_enc, phone_enc, address_enc

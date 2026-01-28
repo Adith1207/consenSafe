@@ -5,8 +5,13 @@
 
   <div class="dashboard-header">
     <div>
-      <h1>My Consents</h1>
-      <p class="welcome-text">Review and manage granted permissions.</p>
+      {% if status == "pending" %}
+        <h1>Consent Requests</h1>
+        <p class="welcome-text">Applications waiting for your approval.</p>
+      {% else %}
+        <h1>Active Consents</h1>
+        <p class="welcome-text">Applications currently allowed to access your data.</p>
+      {% endif %}
     </div>
   </div>
 
@@ -16,24 +21,35 @@
       <div class="dashboard-grid">
         {% for c in consents %}
         <div class="dashboard-card">
+
           <h3>{{ c.app_name }}</h3>
-          <p><strong>Fields:</strong> {{ c.allowed_fields }}</p>
+
+          <p><strong>Requested Data:</strong> {{ c.allowed_fields }}</p>
           <p><strong>Purpose:</strong> {{ c.purpose }}</p>
           <p><strong>Expiry:</strong> {{ c.expiry }}</p>
 
-          {% if c.status == "approved" %}
-            <a href="{{ url_for('revoke_consent', consent_id=c.id) }}"
-               class="danger-btn">
-              Revoke Consent
-            </a>
+          {% if status == "pending" %}
+            <div class="action-row">
+              <a href="{{ url_for('approve_consent', consent_id=c.id) }}"
+                 class="approve-btn">
+                 Approve
+              </a>
+            </div>
           {% else %}
-            <span class="revoked-label">Revoked</span>
+            <div class="action-row">
+              <a href="{{ url_for('revoke_consent', consent_id=c.id) }}"
+                 class="danger-btn">
+                 Revoke Access
+              </a>
+            </div>
           {% endif %}
+
         </div>
         {% endfor %}
       </div>
+
     {% else %}
-      <p>No active consent requests.</p>
+      <p>No {{ status }} consents found.</p>
     {% endif %}
 
   </div>
