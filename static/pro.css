@@ -90,11 +90,11 @@ body {
 
 /* Background images */
 .login-bg {
-  background-image: url("/static/train.jpg");
+  background-image: url("/static/lock2.jpg");
 }
 
 .register-bg {
-  background-image: url("/static/train_register.jpg");
+  background-image: url("/static/lock1.jpg");
 }
 
 /* Auth Card */
