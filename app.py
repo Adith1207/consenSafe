@@ -6,6 +6,17 @@ import time
 from datetime import timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 
+# ===== SIGNATURE & HASH IMPORTS (PATCH 3) =====
+import hmac
+import hashlib
+
+# ===== CRYPTO IMPORTS (PATCH) =====
+import os
+import base64
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives import padding
+from cryptography.hazmat.backends import default_backend
+
 # =====================================================
 # APP CONFIG
 # =====================================================
@@ -16,6 +27,12 @@ app.permanent_session_lifetime = timedelta(minutes=10)
 
 DB_NAME = "database.db"
 ALLOWED_ROLES = ("user", "app", "admin")
+
+# ===== AES KEY (LAB MODE) =====
+AES_KEY = b"0123456789ABCDEF0123456789ABCDEF"  # 32 bytes = AES-256
+
+# ===== SIGNATURE KEY (LAB MODE) =====
+SIGN_KEY = b"consensafe_hmac_signing_key"
 
 # =====================================================
 # OTP STORE (IN-MEMORY)
@@ -52,6 +69,7 @@ def init_db():
             user_id INTEGER NOT NULL,
             email_enc TEXT NOT NULL,
             phone_enc TEXT NOT NULL,
+            address_enc TEXT NOT NULL,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id)
         )
@@ -147,6 +165,83 @@ def has_consent(user_id, app_id, field):
     return False
 
 # =====================================================
+# AES ENCRYPTION / DECRYPTION (PATCH)
+# =====================================================
+
+def encrypt_data(plaintext: str) -> str:
+    iv = os.urandom(16)
+
+    padder = padding.PKCS7(128).padder()
+    padded_data = padder.update(plaintext.encode()) + padder.finalize()
+
+    cipher = Cipher(
+        algorithms.AES(AES_KEY),
+        modes.CBC(iv),
+        backend=default_backend()
+    )
+    encryptor = cipher.encryptor()
+    ciphertext = encryptor.update(padded_data) + encryptor.finalize()
+
+    return base64.b64encode(iv + ciphertext).decode()
+
+
+def decrypt_data(encoded_ciphertext: str) -> str:
+    raw = base64.b64decode(encoded_ciphertext)
+    iv = raw[:16]
+    ciphertext = raw[16:]
+
+    cipher = Cipher(
+        algorithms.AES(AES_KEY),
+        modes.CBC(iv),
+        backend=default_backend()
+    )
+    decryptor = cipher.decryptor()
+    padded_plaintext = decryptor.update(ciphertext) + decryptor.finalize()
+
+    unpadder = padding.PKCS7(128).unpadder()
+    plaintext = unpadder.update(padded_plaintext) + unpadder.finalize()
+
+    return plaintext.decode()
+
+# =====================================================
+# CONSENT HASHING & DIGITAL SIGNATURE (PATCH 3)
+# =====================================================
+
+def compute_consent_hash(data: str) -> str:
+    """
+    Computes SHA-256 hash of consent data
+    """
+    return hashlib.sha256(data.encode()).hexdigest()
+
+
+def sign_consent(consent_hash: str) -> str:
+    """
+    Creates HMAC-SHA256 signature of consent hash
+    """
+    return hmac.new(
+        SIGN_KEY,
+        consent_hash.encode(),
+        hashlib.sha256
+    ).hexdigest()
+
+def verify_consent_integrity(consent):
+    """
+    Verifies consent hash and digital signature
+    """
+    data = f"{consent['user_id']}|{consent['app_id']}|" \
+           f"{consent['allowed_fields']}|" \
+           f"{consent['purpose']}|" \
+           f"{consent['expiry']}"
+
+    recomputed_hash = compute_consent_hash(data)
+
+    if recomputed_hash != consent["consent_hash"]:
+        return False
+
+    expected_sig = sign_consent(recomputed_hash)
+    return hmac.compare_digest(expected_sig, consent["signature"])
+
+# =====================================================
 # ROUTES
 # =====================================================
 
@@ -177,13 +272,31 @@ def register():
 
         try:
             conn = get_db()
-            conn.execute(
+
+            # 1️⃣ Insert user (auth data)
+            cursor = conn.execute(
                 "INSERT INTO users (username,email,password,role) VALUES (?,?,?,?)",
                 (username, email, generate_password_hash(password), role)
             )
+
+            # 2️⃣ Get user_id of newly created user
+            user_id = cursor.lastrowid
+
+            # 3️⃣ Encrypt sensitive PII
+            email_enc = encrypt_data(email)
+            phone_enc = encrypt_data("9999999999")  # placeholder phone for lab
+            address_enc = encrypt_data("Chennai, India") # lab placeholder
+
+            # 4️⃣ Store encrypted data
+            conn.execute(
+                "INSERT INTO user_data (user_id, email_enc, phone_enc,address_enc) VALUES (?, ?, ?,?)",
+                (user_id, email_enc, phone_enc,address_enc)
+            )
+
             conn.commit()
             conn.close()
             return redirect(url_for("login"))
+        
         except sqlite3.IntegrityError:
             return "User already exists"
 
@@ -369,11 +482,24 @@ def request_access():
         expiry = request.form["expiry"]
 
         conn = get_db()
+        # 1️⃣ Build canonical consent data string
+        consent_data = f"{user_id}|{session['user_id']}|{fields}|{purpose}|{expiry}"
+
+
+        # 2️⃣ Hash the consent
+        consent_hash = compute_consent_hash(consent_data)
+
+
+        # 3️⃣ Digitally sign the hash
+        signature = sign_consent(consent_hash)
+
+
         conn.execute("""
-            INSERT INTO consents
-            (user_id, app_id, allowed_fields, purpose, expiry, status, consent_hash, signature)
-            VALUES (?, ?, ?, ?, ?, 'approved', 'hash_placeholder', 'sig_placeholder')
-        """, (user_id, session["user_id"], fields, purpose, expiry))
+        INSERT INTO consents
+        (user_id, app_id, allowed_fields, purpose, expiry, status, consent_hash, signature)
+        VALUES (?, ?, ?, ?, ?, 'approved', ?, ?)
+        """, (user_id, session["user_id"], fields, purpose, expiry, consent_hash, signature))
+
         conn.commit()
         conn.close()
 
@@ -415,6 +541,107 @@ def revoke_consent(consent_id):
     conn.close()
 
     return redirect(url_for("my_consents"))
+
+@app.route("/access-data/<int:user_id>/<field>")
+def access_data(user_id, field):
+    if session.get("role") != "app":
+        return "Unauthorized", 403
+
+    if field not in ("email", "phone", "address"):
+        return "Invalid field", 400
+
+    conn = get_db()
+
+    consent = conn.execute("""
+        SELECT * FROM consents
+        WHERE user_id=? AND app_id=?
+        AND status='approved'
+        AND expiry > datetime('now')
+    """, (user_id, session["user_id"])).fetchone()
+
+    if not consent:
+        conn.close()
+        return "No valid consent", 403
+
+    # 🔐 Verify hash & signature
+    if not verify_consent_integrity(consent):
+        conn.close()
+        return "Consent integrity violation", 403
+
+    if field not in consent["allowed_fields"].split(","):
+        conn.close()
+        return "Field not allowed", 403
+
+    user_data = conn.execute("""
+        SELECT email_enc, phone_enc, address_enc
+        FROM user_data WHERE user_id=?
+    """, (user_id,)).fetchone()
+
+    if not user_data:
+        conn.close()
+        return "No data found", 404
+
+    # 🔓 Decrypt only permitted field
+    if field == "email":
+        value = decrypt_data(user_data["email_enc"])
+    elif field == "phone":
+        value = decrypt_data(user_data["phone_enc"])
+    else:
+        value = decrypt_data(user_data["address_enc"])
+
+    # 🧾 Audit log
+    conn.execute(
+        "INSERT INTO audit_logs (actor_id, action) VALUES (?, ?)",
+        (session["user_id"], f"Accessed {field} of user {user_id}")
+    )
+
+    conn.commit()
+    conn.close()
+
+    return {field: value}
+
+@app.route("/granted-access")
+def granted_access():
+    if session.get("role") != "app":
+        return "Unauthorized", 403
+
+    conn = get_db()
+    consents = conn.execute("""
+        SELECT consents.*, users.username AS user_name
+        FROM consents
+        JOIN users ON consents.user_id = users.id
+        WHERE consents.app_id = ?
+    """, (session["user_id"],)).fetchall()
+    conn.close()
+
+    return render_template("granted_access.html", consents=consents)
+
+@app.route("/audit-logs")
+def audit_logs():
+    role = session.get("role")
+
+    if role not in ("app", "admin"):
+        return "Unauthorized", 403
+
+    conn = get_db()
+
+    if role == "app":
+        logs = conn.execute("""
+            SELECT action, timestamp
+            FROM audit_logs
+            WHERE actor_id = ?
+            ORDER BY timestamp DESC
+        """, (session["user_id"],)).fetchall()
+    else:
+        logs = conn.execute("""
+            SELECT users.username, audit_logs.action, audit_logs.timestamp
+            FROM audit_logs
+            JOIN users ON audit_logs.actor_id = users.id
+            ORDER BY timestamp DESC
+        """).fetchall()
+
+    conn.close()
+    return render_template("audit_logs.html", logs=logs, role=role)
 
 # =====================================================
 # START APP

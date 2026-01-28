@@ -1,30 +1,43 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>My Consents</h2>
 
-<table>
-<tr>
-    <th>App</th>
-    <th>Fields</th>
-    <th>Purpose</th>
-    <th>Expiry</th>
-    <th>Status</th>
-    <th>Action</th>
-</tr>
+<div class="dashboard">
 
-{% for c in consents %}
-<tr>
-    <td>{{ c.app_name }}</td>
-    <td>{{ c.allowed_fields }}</td>
-    <td>{{ c.purpose }}</td>
-    <td>{{ c.expiry }}</td>
-    <td>{{ c.status }}</td>
-    <td>
-        {% if c.status == "approved" %}
-        <a href="{{ url_for('revoke_consent', consent_id=c.id) }}">Revoke</a>
-        {% endif %}
-    </td>
-</tr>
-{% endfor %}
-</table>
+  <div class="dashboard-header">
+    <div>
+      <h1>My Consents</h1>
+      <p class="welcome-text">Review and manage granted permissions.</p>
+    </div>
+  </div>
+
+  <div class="section">
+
+    {% if consents %}
+      <div class="dashboard-grid">
+        {% for c in consents %}
+        <div class="dashboard-card">
+          <h3>{{ c.app_name }}</h3>
+          <p><strong>Fields:</strong> {{ c.allowed_fields }}</p>
+          <p><strong>Purpose:</strong> {{ c.purpose }}</p>
+          <p><strong>Expiry:</strong> {{ c.expiry }}</p>
+
+          {% if c.status == "approved" %}
+            <a href="{{ url_for('revoke_consent', consent_id=c.id) }}"
+               class="danger-btn">
+              Revoke Consent
+            </a>
+          {% else %}
+            <span class="revoked-label">Revoked</span>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>No active consent requests.</p>
+    {% endif %}
+
+  </div>
+
+</div>
+
 {% endblock %}

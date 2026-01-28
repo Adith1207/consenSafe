@@ -405,3 +405,103 @@ body {
 .dropdown-menu a.danger:hover {
   background: #fee2e2;
 }
+
+/* ===== CLICKABLE CARDS ===== */
+.clickable {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ===== FORM PAGE ===== */
+.form-page {
+  display: flex;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+.form-card {
+  width: 420px;
+  background: #ffffff;
+  padding: 32px;
+  border-radius: 18px;
+  box-shadow: 0 20px 45px rgba(0,0,0,0.08);
+}
+
+.form-card h1 {
+  margin-bottom: 6px;
+}
+
+.form-card .subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 24px;
+}
+
+.form-card label {
+  font-weight: 600;
+  font-size: 13px;
+  margin-top: 14px;
+  display: block;
+}
+
+.form-card input,
+.form-card select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+}
+
+.checkbox-group {
+  display: flex;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.form-card button {
+  margin-top: 24px;
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+/* ===== DANGER BUTTON ===== */
+.danger-btn {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 8px 14px;
+  background: #dc2626;
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.revoked-label {
+  color: #9ca3af;
+  font-weight: 600;
+}
+
+.status-badge {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-badge.approved {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-badge.revoked {
+  background: #fee2e2;
+  color: #991b1b;
+}

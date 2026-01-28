@@ -1,25 +1,40 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Request Data Access</h2>
 
-<form method="POST">
-    <label>Select User</label>
-    <select name="user_id" required>
-        {% for u in users %}
-        <option value="{{ u.id }}">{{ u.username }}</option>
+<div class="form-page">
+
+  <div class="form-card">
+    <h1>Request User Consent</h1>
+    <p class="subtitle">
+      Select the user and specify what data your application needs.
+    </p>
+
+    <form method="POST">
+
+      <label>User</label>
+      <select name="user_id" required>
+        {% for user in users %}
+          <option value="{{ user.id }}">{{ user.username }}</option>
         {% endfor %}
-    </select>
+      </select>
 
-    <label>Data Requested</label><br>
-    <input type="checkbox" name="fields" value="email"> Email<br>
-    <input type="checkbox" name="fields" value="phone"> Phone<br>
+      <label>Requested Data</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" name="fields" value="email"> Email</label>
+        <label><input type="checkbox" name="fields" value="phone"> Phone</label>
+        <label><input type="checkbox" name="fields" value="address"> Address</label>
+      </div>
 
-    <label>Purpose</label>
-    <input type="text" name="purpose" required>
+      <label>Purpose</label>
+      <input type="text" name="purpose" placeholder="e.g. Identity Verification" required>
 
-    <label>Expiry Date</label>
-    <input type="date" name="expiry" required>
+      <label>Consent Expiry</label>
+      <input type="date" name="expiry" required>
 
-    <button type="submit">Submit Request</button>
-</form>
+      <button type="submit">Request Consent</button>
+    </form>
+  </div>
+
+</div>
+
 {% endblock %}

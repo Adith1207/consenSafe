@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="dashboard">
+
+  <div class="dashboard-header">
+    <h1>Audit Logs</h1>
+  </div>
+
+  {% if logs %}
+    <div class="dashboard-grid">
+      {% for log in logs %}
+      <div class="dashboard-card">
+        <i class="fa-solid fa-shield-halved"></i>
+
+        {% if role == 'admin' %}
+          <p><strong>Actor:</strong> {{ log.username }}</p>
+        {% endif %}
+
+        <p><strong>Action:</strong> {{ log.action }}</p>
+        <p><strong>Time:</strong> {{ log.timestamp }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No audit logs found.</p>
+  {% endif %}
+
+</div>
+
+{% endblock %}
