@@ -600,8 +600,8 @@ def access_data(user_id, field):
 
     return {field: value}
 
-@app.route("/granted-access")
-def granted_access():
+@app.route("/granted-consents")
+def granted_consents():
     if session.get("role") != "app":
         return "Unauthorized", 403
 
@@ -611,10 +611,11 @@ def granted_access():
         FROM consents
         JOIN users ON consents.user_id = users.id
         WHERE consents.app_id = ?
+        ORDER BY consents.created_at DESC
     """, (session["user_id"],)).fetchall()
-    conn.close()
 
-    return render_template("granted_access.html", consents=consents)
+    conn.close()
+    return render_template("granted_consents.html", consents=consents)
 
 @app.route("/audit-logs")
 def audit_logs():

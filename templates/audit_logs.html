@@ -4,27 +4,54 @@
 <div class="dashboard">
 
   <div class="dashboard-header">
-    <h1>Audit Logs</h1>
+    <div>
+      <h1>Audit Logs</h1>
+      <p class="welcome-text">
+        {% if role == 'admin' %}
+          System-wide security audit trail
+        {% else %}
+          Actions performed by your application
+        {% endif %}
+      </p>
+    </div>
+
+    {% if role == 'admin' %}
+      <span class="role-badge admin">Administrator</span>
+    {% else %}
+      <span class="role-badge app">Application</span>
+    {% endif %}
   </div>
 
-  {% if logs %}
-    <div class="dashboard-grid">
-      {% for log in logs %}
-      <div class="dashboard-card">
-        <i class="fa-solid fa-shield-halved"></i>
+  <div class="section">
+    <div class="dashboard-card" style="overflow-x:auto">
 
-        {% if role == 'admin' %}
-          <p><strong>Actor:</strong> {{ log.username }}</p>
-        {% endif %}
+      <table class="consent-table">
+        <thead>
+          <tr>
+            {% if role == 'admin' %}
+              <th>Actor</th>
+            {% endif %}
+            <th>Action</th>
+            <th>Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
 
-        <p><strong>Action:</strong> {{ log.action }}</p>
-        <p><strong>Time:</strong> {{ log.timestamp }}</p>
-      </div>
-      {% endfor %}
+          {% for log in logs %}
+          <tr>
+            {% if role == 'admin' %}
+              <td>{{ log.username }}</td>
+            {% endif %}
+            <td>{{ log.action }}</td>
+            <td>{{ log.timestamp }}</td>
+          </tr>
+          {% endfor %}
+
+        </tbody>
+      </table>
+
     </div>
-  {% else %}
-    <p>No audit logs found.</p>
-  {% endif %}
+  </div>
 
 </div>
 

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="dashboard">
+
+  <div class="dashboard-header">
+    <div>
+      <h1>Granted Consents</h1>
+      <p class="welcome-text">
+        Users who have granted data access to your application
+      </p>
+    </div>
+    <span class="role-badge app">Application</span>
+  </div>
+
+  {% if consents %}
+  <div class="section">
+    <div class="dashboard-card" style="overflow-x:auto">
+
+      <table class="consent-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Allowed Fields</th>
+            <th>Purpose</th>
+            <th>Status</th>
+            <th>Expiry</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in consents %}
+          <tr>
+            <td>{{ c.user_name }}</td>
+
+            <td>
+              {% for field in c.allowed_fields.split(',') %}
+                <span class="pill">{{ field }}</span>
+              {% endfor %}
+            </td>
+
+            <td>{{ c.purpose }}</td>
+
+            <td>
+              {% if c.status == 'approved' %}
+                <span class="status approved">Approved</span>
+              {% else %}
+                <span class="status revoked">Revoked</span>
+              {% endif %}
+            </td>
+
+            <td>{{ c.expiry }}</td>
+
+            <td>
+              {% if c.status == 'approved' %}
+                {% for field in c.allowed_fields.split(',') %}
+                  <a class="mini-btn"
+                     href="{{ url_for('access_data', user_id=c.user_id, field=field) }}"
+                     target="_blank">
+                    View {{ field }}
+                  </a>
+                {% endfor %}
+              {% else %}
+                <em>Access blocked</em>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+  {% else %}
+    <p>No consents granted yet.</p>
+  {% endif %}
+
+</div>
+
+{% endblock %}
